@@ -3,13 +3,6 @@
   <Namespace>WebApp</Namespace>
 </Query>
 
-/*
-Tasks:    
-    10. Output sum of total number of pages in all books and all int values inside all sequences in data
-    11. Get the dictionary with the key - book author, value - list of author's books
-    12. Output all films of "Matt Damon" excluding films with actors whose name are presented in data as strings
- */
-
 var data = new List<object>
 {
     "Hello",
@@ -35,20 +28,35 @@ var data = new List<object>
     new Book() { Author = "Stephen King", Name="Finders Keepers", Pages = 200},
     "Leonardo DiCaprio"
 };
+var problems = new List<Action>() {
+	Task_1,
+	Task_2,
+	Task_3,
+	Task_4,
+	Task_5,
+	Task_6,
+	Task_7,
+	Task_8,
+	Task_9,
+	Task_10,
+	Task_11,
+	Task_12,
+};
 
-//Task_1();
-//Task_2();
-//Task_3();
-//Task_4();
-//Task_5();
-//Task_6();
-//Task_7();
-//Task_8();
-Task_9();
+Devider();
+
+problems.ForEach(ProblemWrapper);
+
+
+void ProblemWrapper(Action problem) {	
+	problem();
+	
+	Devider();	
+}
 
 void Task_1() {
 	//1. Output all elements excepting ArtObjects
-	data.OfType<ArtObject>().Dump();
+	data.OfType<ArtObject>().Dump("Task 1");
 }
 
 void Task_2() {
@@ -58,7 +66,7 @@ void Task_2() {
 	    .Cast<Film>()
 	    .SelectMany(x => x.Actors)
 		.Select(a => a.Name)
-		.Dump();
+		.Dump("Task 2");
 	
 }
 
@@ -69,7 +77,7 @@ void Task_3() {
 	    .Cast<Film>()
 	    .SelectMany(x => x.Actors)
 		.Where(a => a.Birthdate.Month == 8)
-		.Dump();
+		.Dump("Task 3");
 	
 }
 
@@ -81,7 +89,7 @@ void Task_4() {
 	    .SelectMany(x => x.Actors)
 		.OrderBy(x => x.Birthdate)
 		.Take(2)
-		.Dump();
+		.Dump("Task 4");
 	
 }
 
@@ -93,7 +101,7 @@ void Task_5() {
 			AuthorName = x.Key,
 			NumberOfBooks = x.Count()
 		})
-		.Dump();
+		.Dump("Task 5");
 	
 }
 
@@ -110,7 +118,7 @@ void Task_6() {
 	 				 	NUmbers = x.Count()
 	 				 })
 	 		})
-		.Dump();
+		.Dump("Task 6");
 }
 
 void Task_7() {
@@ -126,7 +134,7 @@ void Task_7() {
 		//	Letter = w.Key,
 		//	Count = w.Count()
 		//})
-		.Dump();
+		.Dump("Task 7");
 }
 
 void Task_8() {
@@ -136,7 +144,7 @@ void Task_8() {
 	data.OfType<Book>()
 		.OrderBy(x => x.Author)
 		.ThenBy(x => x.Pages)
-		.Dump();
+		.Dump("Task 8");
 }
 
 void Task_9() {
@@ -150,10 +158,77 @@ void Task_9() {
 			ActorName = x.Key,
 			Films = x.Select(f => f.fN).ToList(),
 		})
-		.Dump();
+		.Dump("Task 9");
 }
 
 
+void Task_10() {
+/*
+    10. Output sum of total number of pages in all books and all int
+	values inside all sequences in data
+*/
+
+	data.OfType<Book>()
+		.Select(x => x.Pages)
+		.Union(SelectAllIntValuesInsideDataNonDeep())
+		.Sum(x => x)
+		.Dump("Task 10");
+}
+
+IEnumerable<int> SelectAllIntValuesInsideDataNonDeep() {
+	var sequencesOfIntValues = new List<int>();
+	var typeOfEnumerable = typeof(IEnumerable<int>);
+	
+	foreach(var obj in data) {
+		var typeOfObj = obj.GetType();
+		if(obj is int) {
+			sequencesOfIntValues.Add((int)obj);
+			continue;
+		}
+		
+		if(typeOfEnumerable.IsAssignableFrom(typeOfObj)) {
+			sequencesOfIntValues.AddRange((IEnumerable<int>)obj);
+		}
+	}
+	
+	
+	return sequencesOfIntValues;
+}
+
+void Task_11() { 
+/*
+11. Get the dictionary with the key - book author, value - list of
+author's books
+*/
+	data.OfType<Book>()
+		.GroupBy(x => x.Author)
+		.ToDictionary(k => k.Key, v => v.Select(x => x.Name).ToList())
+		.Dump("Task 11");
+
+}
+void Task_12() {
+/*
+12. Output all films of "Matt Damon" excluding films with actors whose name 
+are presented in data as strings
+*/
+	var searchActor = "Matt Damon";
+	var listStr = data.OfType<string>().ToList();
+	data.OfType<Film>()
+		.Where(x => x.Actors.Any(y => y.Name == searchActor)
+			&& !x.Actors.Select(n => n.Name).Intersect(listStr).Any())
+		.Select(x => new {
+			Actor = searchActor,
+			FilmName = x.Name,
+		})
+		.GroupBy(x => x.Actor, v => v.FilmName)
+		.Dump("Task 12");
+}
+
+
+void Devider() {
+	new String('=', 100).Dump();
+}
+			
 List<object> FindNonArtObject(List<object> objects)
 {
     var listNonArtObjects = new List<object>();
